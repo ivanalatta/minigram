@@ -27,7 +27,6 @@ class Post(SQLModel, table=True):
     author_id: int = Field(foreign_key="user.id")
 
     author: User = Relationship(back_populates="posts")
-    # cascade_delete: al borrar un post se borran sus likes y comentarios
     likes: list["Like"] = Relationship(back_populates="post", cascade_delete=True)
     comments: list["Comment"] = Relationship(back_populates="post", cascade_delete=True)
 

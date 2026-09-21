@@ -13,7 +13,6 @@ from .models import User
 
 password_hash = PasswordHash((BcryptHasher(),))
 
-# tokenUrl le dice a Swagger dónde pedir el token (habilita el botón "Authorize")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
