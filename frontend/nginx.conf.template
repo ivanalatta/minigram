@@ -1,0 +1,44 @@
+# La imagen de nginx reemplaza ${DOMAIN} con la variable de entorno al arrancar.
+
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    # Certbot valida el dominio pidiendo un archivo por HTTP
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Todo lo demás se redirige a HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${DOMAIN};
+
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # El backend acepta imágenes de hasta 5 MB; el default de nginx es 1 MB
+    client_max_body_size 6m;
+
+    # SPA: cualquier ruta que no sea un archivo se resuelve con index.html
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # El API y las imágenes se sirven desde el mismo dominio (sin CORS):
+    # nginx reenvía estas rutas al contenedor del backend
+    location ~ ^/(auth|posts|uploads|health) {
+        proxy_pass http://backend:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

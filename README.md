@@ -50,12 +50,51 @@ Abrir http://localhost:5173.
 Si no está configurado, el botón de Google no se muestra y el resto de la app
 funciona normal.
 
-## Producción
+## Producción (Digital Ocean)
+
+Arquitectura: un droplet corre todo con Docker Compose. Nginx (contenedor del
+frontend) sirve la app en HTTPS y hace de reverse proxy hacia el backend, así
+API y frontend comparten dominio (sin CORS). Postgres y las imágenes subidas
+persisten en volúmenes de Docker.
+
+**1. Preparar el servidor** (una sola vez)
+
+- Crear un droplet Ubuntu en Digital Ocean (el básico alcanza) e instalar
+  Docker: https://docs.docker.com/engine/install/ubuntu/
+- Apuntar el dominio al droplet: un registro DNS tipo A con la IP pública.
+- Clonar el repo y configurar:
 
 ```bash
-cp .env.example .env   # y completar los valores
+git clone <url-del-repo> && cd minigram
+cp .env.example .env   # completar DOMAIN, POSTGRES_PASSWORD, SECRET_KEY...
+```
+
+**2. Emitir el certificado HTTPS** (una sola vez, con el puerto 80 libre)
+
+```bash
+docker compose run --rm -p 80:80 certbot certonly --standalone \
+  -d $(grep ^DOMAIN .env | cut -d= -f2) \
+  --agree-tos --register-unsafely-without-email
+```
+
+**3. Levantar todo**
+
+```bash
 docker compose up -d --build
 ```
+
+**Renovar el certificado** (Let's Encrypt dura 90 días; correr cada ~2 meses
+o programarlo con cron):
+
+```bash
+docker compose run --rm certbot renew --webroot -w /var/www/certbot
+docker compose exec frontend nginx -s reload
+```
+
+**Actualizar la app** tras un `git pull`: `docker compose up -d --build`.
+
+Nota: para que el login con Google funcione en producción hay que agregar
+`https://<dominio>` en los "Authorized JavaScript origins" del client ID.
 
 ## Estado del proyecto
 

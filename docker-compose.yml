@@ -1,5 +1,5 @@
-# Orquesta los 3 servicios para producción (Fase 5 - deploy).
-# En desarrollo local corremos frontend y backend directo, sin Docker.
+# Orquesta los servicios para producción (en desarrollo local
+# corremos frontend y backend directo, sin Docker).
 services:
   db:
     image: postgres:16-alpine
@@ -18,18 +18,41 @@ services:
       DATABASE_URL: postgresql://minigram:${POSTGRES_PASSWORD}@db:5432/minigram
       SECRET_KEY: ${SECRET_KEY:?definir en .env}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      CORS_ORIGINS: https://${DOMAIN}
+    volumes:
+      - uploads:/code/uploads
     depends_on:
       - db
-    ports:
-      - "8000:8000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ""
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?definir en .env}
     depends_on:
       - backend
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - certbot-www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+
+  # Solo se ejecuta a mano (emitir/renovar certificados), no con `up`:
+  #   docker compose run --rm certbot renew
+  certbot:
+    image: certbot/certbot
+    profiles: ["tools"]
+    volumes:
+      - certbot-www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
 
 volumes:
   pgdata:
+  uploads:
+  certbot-www:
+  letsencrypt:

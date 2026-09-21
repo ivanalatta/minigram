@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .config import UPLOADS_DIR
+from .config import CORS_ORIGINS, UPLOADS_DIR
 from .database import create_db_and_tables
 from .routers import auth, posts
 
@@ -13,15 +13,12 @@ create_db_and_tables()
 
 app = FastAPI(title="Minigram API", version="0.2.0")
 
-# El frontend (Vite) corre en el puerto 5173 en desarrollo.
 # Sin esto, el navegador bloquea las llamadas del frontend al backend (CORS).
-origins = [
-    "http://localhost:5173",
-]
-
+# En desarrollo el frontend corre en localhost:5173; en producción frontend
+# y backend comparten dominio detrás de nginx, así que CORS casi no se usa.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

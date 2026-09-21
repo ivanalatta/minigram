@@ -15,3 +15,6 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./minigram.db")
 UPLOADS_DIR = "uploads"
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+
+# Orígenes permitidos por CORS, separados por coma
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")

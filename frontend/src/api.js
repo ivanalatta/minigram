@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// En producción VITE_API_URL es "" (mismo dominio, nginx hace de proxy)
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 export function getToken() {
   return localStorage.getItem('token')
