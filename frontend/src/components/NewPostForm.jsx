@@ -41,6 +41,7 @@ function NewPostForm({ onCreated }) {
         type="file"
         ref={fileInputRef}
         accept="image/jpeg,image/png,image/webp"
+        aria-label="Imagen para publicar"
       />
       <input
         type="text"

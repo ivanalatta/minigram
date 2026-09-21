@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,10 +9,17 @@ from .config import CORS_ORIGINS, UPLOADS_DIR
 from .database import create_db_and_tables
 from .routers import auth, posts
 
-os.makedirs(UPLOADS_DIR, exist_ok=True)
-create_db_and_tables()
 
-app = FastAPI(title="Minigram API", version="0.2.0")
+# El setup corre al arrancar el servidor, no al importar el módulo:
+# los tests pueden importar la app sin tocar la base real.
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    create_db_and_tables()
+    yield
+
+
+app = FastAPI(title="Minigram API", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

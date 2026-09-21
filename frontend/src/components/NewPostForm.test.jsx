@@ -21,7 +21,7 @@ describe('NewPostForm', () => {
     render(<NewPostForm onCreated={onCreated} />)
 
     const archivo = new File(['fake-png'], 'foto.png', { type: 'image/png' })
-    await userEvent.upload(document.querySelector('input[type="file"]'), archivo)
+    await userEvent.upload(screen.getByLabelText('Imagen para publicar'), archivo)
     await userEvent.type(
       screen.getByPlaceholderText('Escribí un caption...'),
       'desde el test',

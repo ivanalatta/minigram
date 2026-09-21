@@ -48,7 +48,7 @@ function Feed({ currentUser }) {
   }
 
   return (
-    <div className="feed">
+    <div>
       <NewPostForm onCreated={handleCreated} />
       {error && <p className="error">{error}</p>}
       {!loading && posts.length === 0 && !error && (
