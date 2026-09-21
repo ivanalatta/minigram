@@ -9,6 +9,10 @@ __pycache__/
 # Secretos y configuración local (nunca se suben al repo)
 .env
 
+# Datos locales generados por la app
+*.db
+backend/uploads/
+
 # Editor / sistema
 .vscode/
 .DS_Store
