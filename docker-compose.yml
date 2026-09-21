@@ -16,6 +16,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://minigram:${POSTGRES_PASSWORD}@db:5432/minigram
+      SECRET_KEY: ${SECRET_KEY:?definir en .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     depends_on:
       - db
     ports:

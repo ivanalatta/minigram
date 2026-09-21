@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { apiFetch, setToken } from './api'
+import GoogleLoginButton from './GoogleLoginButton'
 
 function AuthPage({ onLogin }) {
   const [mode, setMode] = useState('login')
@@ -75,6 +76,7 @@ function AuthPage({ onLogin }) {
           {loading ? 'Un momento...' : mode === 'login' ? 'Entrar' : 'Registrarme'}
         </button>
       </form>
+      <GoogleLoginButton onLogin={onLogin} />
       <button className="link-button" onClick={switchMode}>
         {mode === 'login'
           ? '¿No tenés cuenta? Registrate'

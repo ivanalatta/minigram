@@ -37,8 +37,18 @@ npm install
 npm run dev
 ```
 
-Abrir http://localhost:5173 — debe mostrar "API: conectada ✅",
-lo que confirma que frontend y backend se comunican (CORS configurado).
+Abrir http://localhost:5173.
+
+### Login con Google (opcional en desarrollo)
+
+1. En [Google Cloud Console](https://console.cloud.google.com) → APIs & Services →
+   Credentials → Create Credentials → **OAuth client ID**, tipo "Web application".
+2. Agregar `http://localhost:5173` en "Authorized JavaScript origins".
+3. Copiar el client ID en `frontend/.env` (`VITE_GOOGLE_CLIENT_ID`) y en
+   `backend/.env` (`GOOGLE_CLIENT_ID`) — hay un `.env.example` en cada carpeta.
+
+Si no está configurado, el botón de Google no se muestra y el resto de la app
+funciona normal.
 
 ## Producción
 
@@ -52,5 +62,5 @@ docker compose up -d --build
 - [x] Fase 0 — Esqueleto: frontend + backend conectados, Docker listo
 - [x] Fase 1 — Backend: modelos, auth JWT, endpoints de posts/likes/comentarios
 - [x] Fase 2 — Frontend: login, feed, crear post
-- [ ] Fase 3 — Login con Google (OAuth)
+- [x] Fase 3 — Login con Google (OAuth)
 - [ ] Fase 4 — Deploy en Digital Ocean + dominio + HTTPS

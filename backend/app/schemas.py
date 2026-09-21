@@ -39,6 +39,10 @@ class Token(SQLModel):
     token_type: str = "bearer"
 
 
+class GoogleCredential(SQLModel):
+    credential: str
+
+
 class CommentCreate(SQLModel):
     text: str = Field(min_length=1, max_length=500)
 

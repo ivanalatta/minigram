@@ -12,7 +12,8 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     username: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
-    hashed_password: str
+    # None para cuentas creadas con Google: no tienen contraseña local
+    hashed_password: str | None = None
     created_at: datetime = Field(default_factory=utcnow)
 
     posts: list["Post"] = Relationship(back_populates="author")

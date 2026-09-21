@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
+from ..config import GOOGLE_CLIENT_ID
 from ..database import get_session
 from ..models import User
-from ..schemas import Token, UserCreate, UserRead
+from ..schemas import GoogleCredential, Token, UserCreate, UserRead
 from ..security import create_access_token, get_current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -45,14 +48,70 @@ def login(
     session: Session = Depends(get_session),
 ):
     user = session.exec(select(User).where(User.username == form.username)).first()
-    # Mismo mensaje si el usuario no existe o la contraseña falla:
-    # no revelamos cuál de los dos fue (evita enumerar usuarios).
-    if user is None or not verify_password(form.password, user.hashed_password):
+    # Mismo mensaje si el usuario no existe, es una cuenta de Google sin
+    # contraseña, o la contraseña falla: no revelamos cuál fue.
+    if (
+        user is None
+        or user.hashed_password is None
+        or not verify_password(form.password, user.hashed_password)
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario o contraseña incorrectos",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    return Token(access_token=create_access_token(user.username))
+
+
+def unique_username(email: str, session: Session) -> str:
+    base = email.split("@")[0][:24]
+    if len(base) < 3:
+        base = f"user-{base}"
+    candidate = base
+    n = 1
+    while session.exec(select(User).where(User.username == candidate)).first():
+        n += 1
+        candidate = f"{base}{n}"
+    return candidate
+
+
+@router.post("/google", response_model=Token)
+def login_with_google(data: GoogleCredential, session: Session = Depends(get_session)):
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El login con Google no está configurado",
+        )
+    try:
+        # Verifica firma, expiración y que el token fue emitido para ESTA app
+        info = google_id_token.verify_oauth2_token(
+            data.credential, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="El token de Google no es válido",
+        )
+    if not info.get("email_verified"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="El email de la cuenta de Google no está verificado",
+        )
+
+    email = info["email"]
+    user = session.exec(select(User).where(User.email == email)).first()
+    if user is None:
+        user = User(username=unique_username(email, session), email=email)
+        session.add(user)
+        try:
+            session.commit()
+        except IntegrityError:
+            # Dos logins simultáneos con el mismo email nuevo: usamos el
+            # usuario que quedó creado por el otro request.
+            session.rollback()
+            user = session.exec(select(User).where(User.email == email)).one()
+        else:
+            session.refresh(user)
     return Token(access_token=create_access_token(user.username))
 
 
