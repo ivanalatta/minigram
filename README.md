@@ -39,6 +39,17 @@ npm run dev
 
 Abrir http://localhost:5173.
 
+### Tests
+
+```bash
+# Backend (desde backend/, con el venv activado)
+pip install -r requirements-dev.txt
+pytest
+
+# Frontend (desde frontend/)
+npm test
+```
+
 ### Login con Google (opcional en desarrollo)
 
 1. En [Google Cloud Console](https://console.cloud.google.com) → APIs & Services →
