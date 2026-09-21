@@ -1,28 +1,43 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-
-// URL del backend: viene de una variable de entorno para poder
-// cambiarla en producción sin tocar el código.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { apiFetch, clearToken, getToken } from './api'
+import AuthPage from './AuthPage'
+import Feed from './Feed'
 
 function App() {
-  const [apiStatus, setApiStatus] = useState('conectando...')
+  const [user, setUser] = useState(null)
+  const [checkingSession, setCheckingSession] = useState(() => Boolean(getToken()))
 
   useEffect(() => {
-    fetch(`${API_URL}/health`)
-      .then((res) => res.json())
-      .then((data) => setApiStatus(data.status === 'ok' ? 'conectada ✅' : 'error'))
-      .catch(() => setApiStatus('sin conexión ❌'))
+    if (!getToken()) return
+    apiFetch('/auth/me')
+      .then(setUser)
+      .catch(() => clearToken())
+      .finally(() => setCheckingSession(false))
   }, [])
 
+  function handleLogout() {
+    clearToken()
+    setUser(null)
+  }
+
+  if (checkingSession) return null
+
   return (
-    <main>
-      <h1>Minigram</h1>
-      <p>Esqueleto del proyecto — Fase 0</p>
-      <p>
-        API: <strong>{apiStatus}</strong>
-      </p>
-    </main>
+    <>
+      <header className="topbar">
+        <h1>Minigram</h1>
+        {user && (
+          <div className="topbar-user">
+            <span>@{user.username}</span>
+            <button onClick={handleLogout}>Salir</button>
+          </div>
+        )}
+      </header>
+      <main>
+        {user ? <Feed currentUser={user} /> : <AuthPage onLogin={setUser} />}
+      </main>
+    </>
   )
 }
 
