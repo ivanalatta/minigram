@@ -11,6 +11,7 @@ __pycache__/
 
 # Datos locales generados por la app
 *.db
+*.db.bak
 backend/uploads/
 
 # Editor / sistema
