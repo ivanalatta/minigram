@@ -2,6 +2,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from ..config import UPLOADS_DIR
@@ -52,17 +53,22 @@ async def create_post(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
+    imagen_muy_grande = HTTPException(
+        status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+        detail="La imagen supera el máximo de 5 MB",
+    )
     if image.content_type not in ALLOWED_IMAGE_TYPES:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail="Solo se aceptan imágenes JPG, PNG o WebP",
         )
+    # Rechazar por el tamaño declarado ANTES de read(): evita cargar en
+    # memoria un archivo gigante solo para descubrir que era muy grande.
+    if image.size is not None and image.size > MAX_IMAGE_BYTES:
+        raise imagen_muy_grande
     content = await image.read()
-    if len(content) > MAX_IMAGE_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-            detail="La imagen supera el máximo de 5 MB",
-        )
+    if len(content) > MAX_IMAGE_BYTES:  # por si el tamaño no venía declarado
+        raise imagen_muy_grande
 
     # Nombre aleatorio: evita colisiones y que un nombre malicioso
     # (p. ej. ../../algo) escape de la carpeta uploads/.
@@ -102,9 +108,12 @@ def delete_post(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Solo el autor puede borrar su post",
         )
-    (Path(UPLOADS_DIR) / post.image_file).unlink(missing_ok=True)
+    # El archivo se borra DESPUÉS del commit: si el commit fallara, no queda
+    # un post vivo apuntando a una imagen que ya no existe.
+    image_path = Path(UPLOADS_DIR) / post.image_file
     session.delete(post)  # likes y comentarios caen en cascada
     session.commit()
+    image_path.unlink(missing_ok=True)
 
 
 @router.post("/{post_id}/like", response_model=LikeStatus)
@@ -119,7 +128,12 @@ def like_post(
     ).first()
     if already is None:
         session.add(Like(post_id=post_id, user_id=current_user.id))
-        session.commit()
+        try:
+            session.commit()
+        except IntegrityError:
+            # Dos likes simultáneos del mismo usuario: el UNIQUE de la BD
+            # rechaza el segundo, y el resultado final es el mismo.
+            session.rollback()
         session.refresh(post)
     return LikeStatus(like_count=len(post.likes), liked_by_me=True)
 

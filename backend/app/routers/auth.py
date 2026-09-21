@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from ..database import get_session
@@ -12,21 +13,28 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register(data: UserCreate, session: Session = Depends(get_session)):
+    duplicado = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="El usuario o email ya está registrado",
+    )
     exists = session.exec(
         select(User).where((User.username == data.username) | (User.email == data.email))
     ).first()
     if exists:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="El usuario o email ya está registrado",
-        )
+        raise duplicado
     user = User(
         username=data.username,
         email=data.email,
         hashed_password=hash_password(data.password),
     )
     session.add(user)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError:
+        # Dos registros simultáneos pueden pasar el chequeo de arriba;
+        # el constraint UNIQUE de la base de datos es la garantía final.
+        session.rollback()
+        raise duplicado
     session.refresh(user)
     return user
 

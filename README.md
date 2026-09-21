@@ -50,7 +50,7 @@ docker compose up -d --build
 ## Estado del proyecto
 
 - [x] Fase 0 — Esqueleto: frontend + backend conectados, Docker listo
-- [ ] Fase 1 — Backend: modelos, auth JWT, endpoints de posts/likes/comentarios
+- [x] Fase 1 — Backend: modelos, auth JWT, endpoints de posts/likes/comentarios
 - [ ] Fase 2 — Frontend: login, feed, crear post
 - [ ] Fase 3 — Login con Google (OAuth)
 - [ ] Fase 4 — Deploy en Digital Ocean + dominio + HTTPS
