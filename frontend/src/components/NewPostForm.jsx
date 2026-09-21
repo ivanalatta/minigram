@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { apiFetch } from './api'
+import { apiFetch } from '../services/api'
 
 function NewPostForm({ onCreated }) {
   const [caption, setCaption] = useState('')

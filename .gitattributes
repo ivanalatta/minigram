@@ -1,0 +1,3 @@
+# Line endings consistentes en el repo sin importar el sistema operativo
+* text=auto eol=lf
+*.png binary

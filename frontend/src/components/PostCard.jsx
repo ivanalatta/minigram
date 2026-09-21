@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { apiFetch, imageUrl } from './api'
+import { apiFetch, imageUrl } from '../services/api'
 
 function PostCard({ post, currentUser, onChange, onDelete }) {
   const [commentText, setCommentText] = useState('')

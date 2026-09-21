@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import AuthPage from './AuthPage'
-import { getToken } from './api'
-import { jsonResponse, mockFetch } from './test-utils'
+import { getToken } from '../services/api'
+import { jsonResponse, mockFetch } from '../test/utils'
 
 describe('AuthPage', () => {
   it('arranca en modo login y cambia a registro', async () => {

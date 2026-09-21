@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { apiFetch, setToken } from './api'
+import { apiFetch, setToken } from '../services/api'
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const SCRIPT_URL = 'https://accounts.google.com/gsi/client'

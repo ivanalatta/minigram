@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import PostCard from './PostCard'
-import { jsonResponse, makePost, mockFetch } from './test-utils'
+import { jsonResponse, makePost, mockFetch } from '../test/utils'
 
 const ana = { id: 1, username: 'ana', email: 'ana@test.com' }
 

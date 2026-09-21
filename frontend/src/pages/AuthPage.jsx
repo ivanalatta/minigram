@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { apiFetch, setToken } from './api'
-import GoogleLoginButton from './GoogleLoginButton'
+import { apiFetch, setToken } from '../services/api'
+import GoogleLoginButton from '../components/GoogleLoginButton'
 
 function AuthPage({ onLogin }) {
   const [mode, setMode] = useState('login')

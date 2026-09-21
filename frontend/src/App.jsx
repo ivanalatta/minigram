@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { apiFetch, clearToken, getToken } from './api'
-import AuthPage from './AuthPage'
-import Feed from './Feed'
+import { apiFetch, clearToken, getToken } from './services/api'
+import AuthPage from './pages/AuthPage'
+import Feed from './pages/Feed'
 
 function App() {
   const [user, setUser] = useState(null)

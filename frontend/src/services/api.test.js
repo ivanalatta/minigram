@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { apiFetch, clearToken, getToken, setToken } from './api'
-import { jsonResponse, mockFetch } from './test-utils'
+import { jsonResponse, mockFetch } from '../test/utils'
 
 describe('token en localStorage', () => {
   it('guarda, lee y borra el token', () => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from './api'
-import NewPostForm from './NewPostForm'
-import PostCard from './PostCard'
+import { apiFetch } from '../services/api'
+import NewPostForm from '../components/NewPostForm'
+import PostCard from '../components/PostCard'
 
 const PAGE_SIZE = 10
 

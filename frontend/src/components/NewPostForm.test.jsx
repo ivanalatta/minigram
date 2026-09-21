@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import NewPostForm from './NewPostForm'
-import { jsonResponse, makePost, mockFetch } from './test-utils'
+import { jsonResponse, makePost, mockFetch } from '../test/utils'
 
 describe('NewPostForm', () => {
   it('exige elegir una imagen antes de publicar', async () => {

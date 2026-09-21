@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import Feed from './Feed'
-import { jsonResponse, makePost, mockFetch } from './test-utils'
+import { jsonResponse, makePost, mockFetch } from '../test/utils'
 
 const ana = { id: 1, username: 'ana', email: 'ana@test.com' }
 

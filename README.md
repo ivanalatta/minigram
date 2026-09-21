@@ -13,6 +13,29 @@ publicar posts, dar likes y comentar.
 | Auth      | OAuth2 + JWT                | Flujo estándar de FastAPI (`OAuth2PasswordBearer`)   |
 | Deploy    | Docker Compose en Digital Ocean + Nginx + Certbot | Un solo comando levanta todo el stack |
 
+## Estructura
+
+```
+minigram/
+├── backend/
+│   ├── app/
+│   │   ├── main.py        # arranque de FastAPI, CORS, archivos estáticos
+│   │   ├── config.py      # configuración por variables de entorno
+│   │   ├── database.py    # engine y sesión por request
+│   │   ├── models.py      # tablas (SQLModel)
+│   │   ├── schemas.py     # contratos de entrada/salida del API
+│   │   ├── security.py    # hash de contraseñas y JWT
+│   │   └── routers/       # endpoints: auth.py, posts.py
+│   └── tests/
+├── frontend/
+│   └── src/
+│       ├── pages/         # AuthPage, Feed (cada test junto a su archivo)
+│       ├── components/    # PostCard, NewPostForm, GoogleLoginButton
+│       ├── services/      # api.js: única puerta de acceso al backend
+│       └── test/          # setup y utilidades compartidas de test
+└── docker-compose.yml     # producción: db + backend + nginx/certbot
+```
+
 ## Desarrollo local
 
 Requisitos: Node 22+, Python 3.12+.
